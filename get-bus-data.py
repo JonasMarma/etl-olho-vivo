@@ -1,5 +1,4 @@
 import json
-import os
 import requests
 import boto3
 import datetime
@@ -10,29 +9,21 @@ def get_api_key():
     return response["Parameter"]["Value"]
 
 def get_session_cookie():
-    # Create a session object
-    session = requests.Session()
 
-    # Step 1: Authenticate and store the cookie
-    #precisa colocar o token aqui!
-    #eventualmente de forma segura
+    # Fazer a autenticação
     auth_url = "http://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar?token=" + get_api_key()
-
-    # Send the authentication request
+    session = requests.Session()
     response = session.post(auth_url)
 
-    # Check if authentication was successful
+    # Verificar se a autenticação funcionou
     if response.status_code == 200:
-        print("Authentication successful!")
-        #print("Cookies stored in session:", session.cookies.get_dict())
+        print("Autenticação bem sucedida!")
         return session
     else:
-        print("Authentication failed:", response.status_code, response.text)
+        print("Falha de autenticação:", response.status_code, response.text)
         return None
 
 def save_json(json_data, bucket_name, key):
-
-    print("Saving JSON to S3...")
 
     # Convert JSON to a string
     json_string = json.dumps(json_data)
@@ -59,21 +50,28 @@ def save_json(json_data, bucket_name, key):
 
 def lambda_handler(event, context):
 
+    # Fazer autenticação na API - é usado um cookie
     s = get_session_cookie()
 
     data_url = 'http://api.olhovivo.sptrans.com.br/v2.1/Posicao'
 
-    # Send a GET request using the same session
+    # Obter as posições
     data_response = s.get(data_url)
 
-    # Print the response
+    destiantion_bucket = 'olho-vivo-raw'
+    
+
+    now = datetime.datetime.utcnow()
+    s3_key = f"year={now.year}/month={now.month:02}/day={now.day:02}/hour={now.hour:02}/data_{now.strftime('%Y-%m-%dT%H-%M-%S-UTC-0')}.json"
+
+
     if data_response.status_code == 200:
-        print("Data retrieved successfully!")
-        #print(data_response.json())  # Assuming the response is JSON
-        save_json(data_response.json(), 'olho-vivo-raw', 'teste2.json')
+        print("Sucesso na obtenção dos dados! Salvando em:")
+        print(destiantion_bucket + '/')
+        save_json(data_response.json(), destiantion_bucket, s3_key)
 
     else:
-        print("Failed to retrieve data:", data_response.status_code, data_response.text)
+        print("Falha na obtenção dos dados de posição", data_response.status_code, data_response.text)
 
 
     return {
