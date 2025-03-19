@@ -162,8 +162,7 @@ def lambda_handler(event, context):
 
 
     # LOCALIZAÇÃO DE VÍCULOS ACESSIVEIS
-    #acessiveis_df = aggregated_df      [['data', 'intervalo', 'letreiro', 'codigo_linha', 'sentido_linha', 'origem_linha', 'destino_linha', 'prefixo_veiculo', 'acessibilidade']]
-    acessiveis_df = aggregated_df[['data', 'intervalo', 'letreiro', 'codigo_linha', 'sentido_linha', 'origem_linha', 'destino_linha', 'prefixo_veiculo', 'px', 'py']]
+    acessiveis_df = aggregated_df[['data', 'intervalo', 'letreiro', 'codigo_linha', 'sentido_linha', 'origem_linha', 'destino_linha', 'prefixo_veiculo', 'px', 'py', 'acessibilidade']]
     write_csv_to_s3(output_bucket, output_acessiveis, acessiveis_df)
 
 
