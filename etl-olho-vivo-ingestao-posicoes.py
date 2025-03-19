@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import boto3
 from io import StringIO, BytesIO
-from datetime import datetime
+import datetime
 
 s3 = boto3.client('s3')
 
@@ -18,11 +18,17 @@ def write_parquet_to_s3(bucket, key, df):
     s3.put_object(Bucket=bucket, Key=key, Body=parquet_buffer.getvalue())
 
 def lambda_handler(event, context):
+
+    day_to_process = (datetime.datetime.today() + datetime.timedelta(days=-1)).strftime('%Y-%m-%d')
+    #day_to_process = '2025-03-06' # Remover o comentário para processamento manual
+
     source_bucket = 'olho-vivo-raw'
-    source_prefix = 'posicoes/year=2025/month=03/day=05/'
+    source_prefix = 'posicoes/year=' + day_to_process[:4] + '/month=' + day_to_process[5:7] + '/day=' + day_to_process[-2:] + '/'
+
+    print('Source prefix:' + source_prefix)
     
     target_bucket = 'olho-vivo-etl'
-    target_key = 'pos-2025-03-06.parquet'
+    target_key = 'raw/' + day_to_process[:7] + '/pos-' + day_to_process + '.parquet'
 
     # List all files in the day directory
     response = s3.list_objects_v2(Bucket=source_bucket, Prefix=source_prefix)
@@ -48,8 +54,8 @@ def lambda_handler(event, context):
                         'destino_linha': line.get('lt0'),
                         'origem_linha': line.get('lt1'),
                         'prefixo_veiculo': vehicle.get('p'),
-                        'accessivel': vehicle.get('a'),
-                        'timestamp': int(datetime.strptime(vehicle.get('ta'), "%Y-%m-%dT%H:%M:%SZ").timestamp()),
+                        'acessibilidade': vehicle.get('a'),
+                        'timestamp': int(datetime.datetime.strptime(vehicle.get('ta'), "%Y-%m-%dT%H:%M:%SZ").timestamp()),
                         'py': vehicle.get('py'),
                         'px': vehicle.get('px')
                     }
