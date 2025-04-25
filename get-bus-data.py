@@ -62,7 +62,7 @@ def lambda_handler(event, context):
     
 
     now = datetime.datetime.utcnow()
-    s3_key = f"year={now.year}/month={now.month:02}/day={now.day:02}/hour={now.hour:02}/data_{now.strftime('%Y-%m-%dT%H-%M-%S-UTC-0')}.json"
+    s3_key = f"posicoes/year={now.year}/month={now.month:02}/day={now.day:02}/hour={now.hour:02}/data_{now.strftime('%Y-%m-%dT%H-%M-%S-UTC-0')}.json"
 
 
     if data_response.status_code == 200:
