@@ -1,13 +1,13 @@
 # 🚍 ETL - Dados da API Olho Vivo (SPTrans)
 
-Este projeto implementa um pipeline de ETL (Extract, Transform, Load) sobre os dados públicos da **API Olho Vivo**, disponibilizados pela SPTrans, com foco em dados de posição e velocidade de ônibus da cidade de São Paulo. Foi desenvolvido como trabalho final do MBA em Engenharia de Dados, visando fornecer datasets confiáveis e acessíveis para análises sobre mobilidade urbana.
+Este projeto implementa um ETL básico sobre os dados públicos da **API Olho Vivo**, disponibilizados pela SPTrans, com foco em dados de posição e velocidade de ônibus da cidade de São Paulo. Visando fornecer datasets confiáveis e acessíveis para análises sobre mobilidade urbana e sobretudo, um histórico de posições para analistas e cientistas de dados.
 
 ## 📂 Estrutura do Projeto
 
 O projeto está dividido em três scripts principais:
 
 ### 1. `get-bus-data.py` - Ingestão Bruta
-Responsável por consumir os dados diretamente da API Olho Vivo e armazená-los em formato **JSON cru** para posterior transformação.
+Responsável por consumir os dados diretamente da API Olho Vivo e armazená-los em formato JSON para posterior transformação.
 
 ### 2. `etl-olho-vivo-ingestao-posicoes.py` - Transformação e Armazenamento
 Realiza o **flattening** dos dados JSON brutos, padronizando-os em **formato Parquet** e enviando-os para um **bucket S3**. É executado diariamente às **6:00 AM (GMT-3)** via **AWS EventBridge**.
@@ -21,12 +21,10 @@ Consolida os dados processados anteriormente, gerando arquivos **CSV** com agreg
 
 Executado automaticamente às **6:30 AM (GMT-3)** via EventBridge.
 
-## 🧼 Processos de Limpeza Aplicados
+## 🧼 Processos de Limpeza Aplicados na `etl-olho-vivo-velocidades-medias.py
 
-Durante o ETL, os seguintes filtros são aplicados para garantir a qualidade dos dados:
-
-- 🔻 **Intervalos > 10 minutos** entre aquisições são descartados
-- 📏 **Distâncias arredondadas** a duas casas decimais (centímetros)
+- 🔻 **Intervalos > 10 minutos** entre aquisições são descartados para manter a precisão
+- 📏 **Distâncias arredondadas** a duas casas decimais (centímetros - mais do que o suficiente)
 - 🚫 Tuplas com **posição anterior nula** são ignoradas
 - 🚀 **Velocidades > 120 km/h** são desconsideradas como anomalias
 
